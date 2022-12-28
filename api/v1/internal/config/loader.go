@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/viper"
@@ -42,8 +43,10 @@ func getProductionRuntimeConfig() (Config, error) {
 func GetRuntimeConfig() (Config, error) {
 
 	if os.Getenv("KRAIKUB_ENV") == "production" {
+		fmt.Println("Read configs from environment variables.")
 		return getProductionRuntimeConfig()
 	}
+	fmt.Println("Read configs from .env file.")
 	var conf Config
 	viper.AddConfigPath(".")
 	viper.SetConfigFile(".env")
