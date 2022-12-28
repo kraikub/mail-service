@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/kraikub/mail-service/api/v1/internal/config"
@@ -17,8 +16,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(config)
 
 	// ctx, _ := context.WithCancel(context.Background())
 	mail := usecases.CreateMailUseCase(
