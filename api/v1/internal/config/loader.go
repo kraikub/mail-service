@@ -42,6 +42,13 @@ func getProductionRuntimeConfig() (Config, error) {
 
 func GetRuntimeConfig() (Config, error) {
 
+	fmt.Println(os.Getenv("SERVER_NAME"))
+	fmt.Println(os.Getenv("SERVER_PORT"))
+	fmt.Println(os.Getenv("SMTP_HOST"))
+	fmt.Println(os.Getenv("SMTP_PORT"))
+	fmt.Println(os.Getenv("SMTP_SERVICE_EMAIL"))
+	fmt.Println(os.Getenv("SMTP_SERVICE_EMAIL_PASSWORD"))
+
 	if os.Getenv("KRAIKUB_ENV") == "production" {
 		fmt.Println("Read configs from environment variables.")
 		return getProductionRuntimeConfig()
