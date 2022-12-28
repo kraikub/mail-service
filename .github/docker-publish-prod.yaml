@@ -1,0 +1,106 @@
+name: Build and Deploy (prod)
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  push:
+    branches: [ "main" ]
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-deploy:
+
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@7e0881f8fe90b25e305bbf0309761e9314607e25
+        with:
+          cosign-release: 'v1.9.0'
+
+
+      # Workaround: https://github.com/docker/build-push-action/issues/461
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # Remote
+      - name: Deploy to Internal droplet (VM)
+        uses: appleboy/ssh-action@master
+        env:
+          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KRAIKUB_ENV: ${{ secrets.KRAIKUB_ENV }}
+          SERVER_NAME: ${{ secrets.SERVER_NAME }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SERVICE_EMAIL: ${{ secrets.SMTP_SERVICE_EMAIL }}
+          SMTP_SERVICE_EMAIL_PASSWORD: ${{ secrets.SMTP_SERVICE_EMAIL_PASSWORD }}
+
+          
+        with:
+          host: ${{ secrets.DO_HOST_IP }}
+          username: ${{ secrets.DO_USERNAME }}
+          password: ${{ secrets.DO_PASSWORD }}
+          envs: GIT_USERNAME, GITHUB_TOKEN, KRAIKUB_ENV, SERVER_NAME, SERVER_PORT, SMTP_HOST, SMTP_PORT, SMTP_SERVICE_EMAIL, SMTP_SERVICE_EMAIL_PASSWORD
+          script: |
+            docker stop mail-service
+            docker container prune -f 
+            docker image prune -f
+            docker login -u $GIT_USERNAME -p $GITHUB_TOKEN ghcr.io
+            docker pull ghcr.io/${{ github.repository }}:latest
+            docker run --name mail-service --network=kraikub_network --restart=always -dit -p 3064:$SERVER_PORT -e KRAIKUB_ENV=$KRAIKUB_ENV -e SERVER_NAME=$SERVER_NAME -e SERVER_PORT=$SERVER_PORT -e SMTP_HOST=$SMTP_HOST -e SMTP_PORT=$SMTP_PORT -e SMTP_SERVICE_EMAIL=$SMTP_SERVICE_EMAIL -e SMTP_SERVICE_EMAIL_PASSWORD=$SMTP_SERVICE_EMAIL_PASSWORD ghcr.io/${{ github.repository }}:latest
+            echo "${{ github.repository }};production;${{ github.job }};$(date)" >> deployments.log
+
