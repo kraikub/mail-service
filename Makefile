@@ -12,6 +12,6 @@ run-production-ps:
 	. ./run-production.ps1
 
 image:
-	docker build -t kraikub/mail-service -f ./build/docker/Dockerfile .
+	docker build -t kraikub/mail-service .
 
 

@@ -36,6 +36,10 @@ type smtp struct {
 func getProductionRuntimeConfig() (Config, error) {
 	var conf Config
 	viper.AutomaticEnv()
+	for _, key := range EnvList {
+		viper.BindEnv(key)
+	}
+	
 	err := viper.Unmarshal(&conf)
 	return conf, err
 }
