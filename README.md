@@ -1,1 +1,1 @@
-# Kraikub Account Manager API
+# Mail service
