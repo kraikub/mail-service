@@ -101,6 +101,6 @@ jobs:
             docker image prune -f
             docker login -u $GIT_USERNAME -p $GITHUB_TOKEN ghcr.io
             docker pull ghcr.io/${{ github.repository }}:latest
-            docker run --name mail-service --network=kraikub_network --restart=always -dit -p 3064:$SERVER_PORT -e KRAIKUB_ENV=$KRAIKUB_ENV -e SERVER_NAME=$SERVER_NAME -e SERVER_PORT=$SERVER_PORT -e SMTP_HOST=$SMTP_HOST -e SMTP_PORT=$SMTP_PORT -e SMTP_SERVICE_EMAIL=$SMTP_SERVICE_EMAIL -e SMTP_SERVICE_EMAIL_PASSWORD=$SMTP_SERVICE_EMAIL_PASSWORD ghcr.io/${{ github.repository }}:latest
+            docker run --name mail-service --network=kraikub_network --restart=always -dit -p 3064:3064 -e KRAIKUB_ENV=$KRAIKUB_ENV -e SERVER_NAME=$SERVER_NAME -e SERVER_PORT=$SERVER_PORT -e SMTP_HOST=$SMTP_HOST -e SMTP_PORT=$SMTP_PORT -e SMTP_SERVICE_EMAIL=$SMTP_SERVICE_EMAIL -e SMTP_SERVICE_EMAIL_PASSWORD=$SMTP_SERVICE_EMAIL_PASSWORD ghcr.io/${{ github.repository }}:latest
             echo "${{ github.repository }};production;${{ github.job }};$(date)" >> deployments.log
 

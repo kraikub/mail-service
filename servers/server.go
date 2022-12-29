@@ -42,7 +42,7 @@ func (serv *kraikubServer) StartWithGraceFullShutdown(gc func(c context.CancelFu
 
 	srv := &http.Server{
 		Handler: serv.router,
-		Addr:    fmt.Sprintf(":%d", serv.port),
+		Addr:    fmt.Sprintf(":%d", 3064),
 	}
 
 	go func() {
