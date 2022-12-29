@@ -15,7 +15,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /mail-service/src
 
 COPY --from=builder /mail-service/src/app .
-COPY --from=builder /mail-service/src/templates .
+COPY --from=builder /mail-service/src/templates ./templates
 
 EXPOSE 3064
 
