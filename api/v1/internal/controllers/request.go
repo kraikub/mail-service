@@ -6,4 +6,5 @@ type MailTransferDTO struct {
 	Name       string `json:"name"`
 	DeviceName string `json:"deviceName"`
 	Lang       string `json:"lang"`
+	Ref        string `json:"ref"`
 }

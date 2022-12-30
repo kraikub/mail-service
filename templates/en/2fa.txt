@@ -9,6 +9,7 @@ Content-Type: text/html; charset=\"UTF-8\";
     <div>
       <h2>Confirm your sign in event</h2>
       <p>Hi {{ .Name }}. Please use this 6 digits code below to sign in on <strong>{{ .DeviceName }}</strong></p>
+      <p>REF: {{ .Ref }}</p>
       <div style="max-width: 500px; margin-bottom: 50px;">
         <p style="letter-spacing: 5px; font-size: 50px; font-weight: 500;">{{ .Code }}</p>
       </div>

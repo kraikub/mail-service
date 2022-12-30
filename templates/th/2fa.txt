@@ -9,6 +9,7 @@ Content-Type: text/html; charset=\"UTF-8\";
     <div>
        <h2>ยืนยันการเข้าสู่ระบบ</h2>
       <p>สวัสดี {{ .Name }}. โปรดใช้รหัส 6 ตัวนี้ในการเจ้าสู่ระบบบรเครื่อง <strong>{{ .DeviceName }}</strong> ของคุณ</p>
+      <p>REF: {{ .Ref }}</p>
       <div style="margin-bottom: 50px;">
         <p style="letter-spacing: 5px; font-size: 50px; font-weight: 500;">{{ .Code }}</p>
       </div>

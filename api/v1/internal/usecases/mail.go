@@ -10,7 +10,7 @@ import (
 )
 
 type MailUseCase interface {
-	TwoFA(lang string, to string, code string, name string, deviceName string) error
+	TwoFA(lang string, to string, code string, name string, deviceName string, ref string) error
 	VerifyEmail(lang string, to string, code string, name string) error
 }
 
@@ -19,10 +19,11 @@ type MailData struct {
 }
 
 type TwoFactorMailStructure struct {
-	To   string
-	Code string
-	Name string
+	To         string
+	Code       string
+	Name       string
 	DeviceName string
+	Ref        string
 }
 
 type mailUseCase struct {
@@ -51,29 +52,30 @@ func loadAndParse(templatePath string, mdata interface{}) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
-	
+
 	buf := new(bytes.Buffer)
 	t.Execute(buf, mdata)
 	return buf.Bytes(), nil
 }
 
-func (s mailUseCase) TwoFA(lang string, to string, code string, name string, deviceName string) error {
+func (s mailUseCase) TwoFA(lang string, to string, code string, name string, deviceName string, ref string) error {
 
 	if lang == "" {
 		return errors.New("Cannot find language prefference.")
 	}
 
 	mdata := TwoFactorMailStructure{
-		To: to,
-		Code: code,
-		Name: name,
+		To:         to,
+		Code:       code,
+		Name:       name,
 		DeviceName: deviceName,
+		Ref: ref,
 	}
 
 	from := s.serviceEmail
 	password := s.serviceEmailPassword
 
-	path := "./templates/"+lang+"/2fa.txt"
+	path := "./templates/" + lang + "/2fa.txt"
 
 	message, err := loadAndParse(path, mdata)
 	if err != nil {
@@ -99,7 +101,7 @@ func (s mailUseCase) VerifyEmail(lang string, to string, code string, name strin
 	}
 
 	mdata := TwoFactorMailStructure{
-		To: to,
+		To:   to,
 		Code: code,
 		Name: name,
 	}
@@ -107,7 +109,7 @@ func (s mailUseCase) VerifyEmail(lang string, to string, code string, name strin
 	from := s.serviceEmail
 	password := s.serviceEmailPassword
 
-	path := "./templates/"+lang+"/verify.txt"
+	path := "./templates/" + lang + "/verify.txt"
 
 	message, err := loadAndParse(path, mdata)
 	if err != nil {

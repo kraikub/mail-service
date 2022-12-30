@@ -24,7 +24,7 @@ func (h handler) TwoFA(c *gin.Context) {
 		handleResponse(c, http.StatusUnprocessableEntity, false, err.Error(), nil)
 		return
 	}
-	h.mail.TwoFA(mDTO.Lang, mDTO.To, mDTO.Code, mDTO.Name, mDTO.DeviceName)
+	h.mail.TwoFA(mDTO.Lang, mDTO.To, mDTO.Code, mDTO.Name, mDTO.DeviceName, mDTO.Ref)
 	c.JSON(http.StatusOK, gin.H{
 		"email_status": "sent",
 	})
@@ -42,4 +42,3 @@ func (h handler) VerifyEmail(c *gin.Context) {
 		"email_status": "sent",
 	})
 }
-
