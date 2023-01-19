@@ -14,6 +14,7 @@ func AssignRouter(r *gin.Engine, mail usecases.MailUseCase) {
 		v1.GET("/", h.Hello)
 		v1.POST("/2fa", h.TwoFA)
 		v1.POST("/verify-email", h.VerifyEmail)
+		v1.POST("/org-invite", h.OrgInvite)
 	}
 
 }

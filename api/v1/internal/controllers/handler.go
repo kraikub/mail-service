@@ -42,3 +42,16 @@ func (h handler) VerifyEmail(c *gin.Context) {
 		"email_status": "sent",
 	})
 }
+
+func (h handler) OrgInvite(c *gin.Context) {
+	var mDTO MailTransferDTO
+
+	if err := c.ShouldBind(&mDTO); err != nil {
+		handleResponse(c, http.StatusUnprocessableEntity, false, err.Error(), nil)
+		return
+	}
+	h.mail.OrgInvite(mDTO.To, mDTO.Code, mDTO.Name, mDTO.OrgName, mDTO.OrgUsername, mDTO.By, mDTO.Position)
+	c.JSON(http.StatusOK, gin.H{
+		"email_status": "sent",
+	})
+}
